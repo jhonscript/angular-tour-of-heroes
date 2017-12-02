@@ -9,20 +9,23 @@ import { Hero } from './hero';
 import { MessageService } from './message.service';
 import { HttpHeaderResponse } from '@angular/common/http/src/response';
 
-const httpOptions = {
+const httpOptions =
+{
   headers: new HttpHeaders({ 'Content-Type' : 'application/json' })
 }
 
 @Injectable()
-export class HeroService {
+export class HeroService
+{
 
   private heroesUrl = 'api/heroes';
 
   constructor(private http: HttpClient, private messageService: MessageService) { }
 
-  private handleError<T> (operation = 'operation', result?: T) {
-    return (error: any): Observable<T> => {
-
+  private handleError<T> (operation = 'operation', result?: T)
+  {
+    return (error: any): Observable<T> =>
+    {
       console.error(error); // log to console instead
 
       this.log(`${operation} failed: ${error.message}`);
@@ -31,7 +34,8 @@ export class HeroService {
     };
   }
 
-  getHeroes (): Observable<Hero[]> {
+  getHeroes (): Observable<Hero[]>
+  {
     return this.http.get<Hero[]>(this.heroesUrl)
       .pipe(
         tap(heroes => this.log(`fetched heroes`))
@@ -66,7 +70,8 @@ export class HeroService {
       )
   }
 
-  deleteHero (hero: Hero | number): Observable<Hero> {
+  deleteHero (hero: Hero | number): Observable<Hero>
+  {
     const id = typeof hero === 'number' ? hero : hero.id;
     const url = `${this.heroesUrl}/${id}`;
 
@@ -77,10 +82,22 @@ export class HeroService {
       )
   }
 
+  searchHeroes(term: string): Observable<Hero[]>
+  {
+    if(!term.trim())
+    {
+      return of([]);
+    }
+    return this.http.get<Hero[]>(`api/heroes/?name=${term}`)
+      .pipe(
+        tap(_ => this.log(`found heroes matching "${term}"`))
+        , catchError(this.handleError<Hero[]>('searchHeroes', []))
+      )
+  }
+
   private log(message: string)
   {
     this.messageService.add('HeroService ' + message);
   }
 
 }
-
